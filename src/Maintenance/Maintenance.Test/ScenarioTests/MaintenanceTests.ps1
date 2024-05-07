@@ -18,27 +18,17 @@ Test Set-AzScheduledEvent
 #>
 function Test-AzScheduledEventAcknowledge
 {
-    $resourceGroupName = Get-RandomResourceGroupName
-    $location = "eastus2euap"
-    $resourceName = Get-RandomVirtualMachineName
+    #create the resource before running this test
+    $resourceGroupName = "SEAckTest"
+    $resourceName = "vm"
     $resourceType = "virtualMachines"
-    $scheduledEventId = "3F5E7B79-2DD3-4030-B645-94DC91DCC6B1"
+    $scheduledEventId = "027CFDA2-0566-4726-A5F8-0F9B008772ED"
         
     try
     {
-        New-AzResourceGroup -Name $resourceGroupName -Location $location
-        Write-Host "Created RG $location"
-
-        Import-Module "Hyper-V"
-
-        New-AzVM -Name $resourceName -MemoryStartupBytes 512MB
-        Write-Host "Created $resourceName"
-
         Assert-ThrowsContains { 
          Set-AzScheduledEvent -ResourceGroupName $resourceGroupName -ResourceType $resourceType -ResourceName $resourceName -ScheduledEventId $scheduledEventId
         } "Operation returned an invalid status code 'NotFound'" > $null
-
-        Write-Host "Assertion succeeded"
     }
     finally
     {
