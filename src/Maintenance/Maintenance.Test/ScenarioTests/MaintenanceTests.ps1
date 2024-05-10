@@ -19,13 +19,33 @@ Test Set-AzScheduledEvent
 function Test-AzScheduledEventAcknowledge
 {
     #create the resource before running this test
-    $resourceGroupName = "SEAckTest"
-    $resourceName = "vm"
+    $resourceGroupName = Get-RandomResourceGroupName
+    $location = "eastus2euap"
+    $networkSecurityGroup = "testnsg"
+    $resourceName = Get-RandomVirtualMachineName
     $resourceType = "virtualMachines"
+    $subnetName = "testsubnet"
     $scheduledEventId = "027CFDA2-0566-4726-A5F8-0F9B008772ED"
+    $vnetName = "testvnet"
+    $nicName = "testnic"
         
     try
     {
+        New-AzResourceGroup -Name $resourceGroupName -Location $location
+        $securityGroup =  New-AzNetworkSecurityGroup -ResourceGroupName $resourceGroupName -Name $networkSecurityGroup  -Location $location
+        $subnetConfig = New-AzVirtualNetworkSubnetConfig -Name $subnetName -AddressPrefix "10.0.0.0/24" -NetworkSecurityGroup $securityGroup
+        $vnet = New-AzVirtualNetwork -Name $vnetName -ResourceGroupName $resourceGroupName -Location $location -AddressPrefix "10.0.0.0/16" -Subnet $subnetConfig
+        Set-AzVirtualNetworkSubnetConfig -VirtualNetwork $vnet -AddressPrefix "10.0.0.0/24" -Name $subnetName
+        $nic = New-AzNetworkInterface -Name $nicName -ResourceGroupName $resourceGroupName -Location $location -Subnet (Get-AzVirtualNetworkSubnetConfig -Name $subnetName -VirtualNetwork $vnet)
+
+        $cred = New-Object System.Management.Automation.PSCredential("adminusername",( ConvertTo-SecureString  "PasswordCLIMaintenanceRP8!" -AsPlainText -Force))
+
+        $vmConfig = New-AzVMConfig -VMName "rishivm" -VMSize Standard_E2s_v3
+        $vmConfig = Set-AzVMOperatingSystem -VM $vmConfig -Windows -ComputerName  "testclient" -Credential $cred -PatchMode "AutomaticByPlatform"
+        $vmConfig = Add-AzVMNetworkInterface -VM $vmConfig -Id $nic.Id
+        
+        New-AzVM -ResourceGroupName $resourceGroupName -Location $location -VM $vmConfig 
+
         Assert-ThrowsContains { 
          Set-AzScheduledEvent -ResourceGroupName $resourceGroupName -ResourceType $resourceType -ResourceName $resourceName -ScheduledEventId $scheduledEventId
         } "Operation returned an invalid status code 'NotFound'" > $null

@@ -24,8 +24,8 @@ New-AzMaintenanceConfiguration [-ResourceGroupName] <String> [-Name] <String> [-
  [-WindowParameterKbNumberToExclude <System.Collections.Generic.HashSet`1[System.String]>]
  [-WindowParameterClassificationToInclude <System.Collections.Generic.HashSet`1[System.String]>]
  [-WindowParameterExcludeKbRequiringReboot <Boolean>] [-InstallPatchRebootSetting <String>] [-PreTask <String>]
- [-PostTask <String>] [-AsJob] [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-PostTask <String>] [-AsJob] [-DefaultProfile <IAzureContextContainer>] [-ProgressAction <ActionPreference>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -293,6 +293,21 @@ List of tasks executed before schedule. e.g. [{'source' :'runbook', 'taskScope':
 Type: System.String
 Parameter Sets: (All)
 Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: System.Management.Automation.ActionPreference
+Parameter Sets: (All)
+Aliases: proga
 
 Required: False
 Position: Named
