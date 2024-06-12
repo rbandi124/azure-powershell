@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using Microsoft.Rest.Azure;
 
 namespace Microsoft.Azure.Commands.Maintenance
 {
@@ -33,17 +34,24 @@ namespace Microsoft.Azure.Commands.Maintenance
             base.ExecuteCmdlet();
             ExecuteClientAction(() =>
             {
-                if (ShouldProcess("default", VerbsCommon.New))
+                try
                 {
-                    string resourceGroupName = this.ResourceGroupName;
-                    string resourceType = this.ResourceType;
-                    string resourceName = this.ResourceName;
-                    string ScheduledEvent = this.ScheduledEventId;
-                    ScheduledEventApproveResponse response;
-                    response = ScheduledEventClient.Acknowledge(resourceGroupName, resourceType, resourceName, ScheduledEventId);
-                    var psObject = new PSSchueduledEvent();
-                    MaintenanceAutomationAutoMapperProfile.Mapper.Map<ScheduledEventApproveResponse, PSSchueduledEvent>(response, psObject);
-                    WriteObject(psObject);
+                    if (ShouldProcess("default", VerbsCommon.New))
+                    {
+                        string resourceGroupName = this.ResourceGroupName;
+                        string resourceType = this.ResourceType;
+                        string resourceName = this.ResourceName;
+                        string ScheduledEvent = this.ScheduledEventId;
+                        ScheduledEventApproveResponse response;
+                        response = ScheduledEventClient.Acknowledge(resourceGroupName, resourceType, resourceName, ScheduledEventId);
+                        var psObject = new PSSchueduledEvent();
+                        MaintenanceAutomationAutoMapperProfile.Mapper.Map<ScheduledEventApproveResponse, PSSchueduledEvent>(response, psObject);
+                        WriteObject(psObject);
+                    }
+                }
+                catch (MaintenanceErrorException ex)
+                {
+                    throw new CloudException(ex.Body.Error.Message, ex);
                 }
             });
         }
